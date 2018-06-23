@@ -9,7 +9,8 @@ const { width, height } = Dimensions.get('window');
 export default class App extends React.Component {
   state = {
     newToDo: "",
-    loadedToDos: false
+    loadedToDos: false,
+    toDos: {}
   }
 
   componentDidMount(){
@@ -17,7 +18,7 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { newToDo, loadedToDos } = this.state;
+    const { newToDo, loadedToDos, toDos } = this.state;
 
     if(!loadedToDos){
       return (
@@ -39,9 +40,10 @@ export default class App extends React.Component {
             placeholderTextColor={"#999"}
             returnKeyType={'done'}
             autoCorrect={false}
+            onSubmitEditing={this._addToDo}
           />
           <ScrollView contentContainerStyle={styles.toDos}>
-            <ToDo text={"hello I am To Do"} />
+            {Object.values(toDos).map(todo => <ToDo key={todo.id} {...todo} />)}
           </ScrollView>
         </View>
       </View>
@@ -57,6 +59,31 @@ export default class App extends React.Component {
     this.setState({
       loadedToDos: true
     })
+  }
+  _addToDo = () => {
+    const { newToDo } = this.state;
+    if(newToDo !== ""){
+      this.setState(prevState => {
+        const ID = uuidv1();
+        const newToDoObject = {
+          [ID]:{
+            id: ID,
+            isCompleted: false,
+            text: newToDo,
+            createdAt: Date.now()
+          }
+        };
+        const newState = {
+          ...prevState,
+          newToDo: "",
+          toDos:{
+            ...prevState.toDos,
+            ...newToDoObject
+          }
+        };
+        return { ...newState };
+      })
+    }
   }
 }
 
