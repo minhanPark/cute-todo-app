@@ -5,14 +5,18 @@ import { Feather } from '@expo/vector-icons';
 const { width, height } = Dimensions.get('window');
 
 export default class ToDo extends React.Component{
-  state = {
-    isEditing: false,
-    isCompleted: false,
-    toDoValue: ''
+
+  constructor(props){
+    super(props);
+    this.state = {
+      isEditing: false,
+      toDoValue: props.text
+    }
   }
+
   render(){
-    const { isEditing ,isCompleted, toDoValue } = this.state;
-    const { text } = this.props;
+    const { isEditing, toDoValue } = this.state;
+    const { text, id, isCompleted, deleteToDo } = this.props;
 
     return (
       <View style={styles.container}>
@@ -59,7 +63,12 @@ export default class ToDo extends React.Component{
             <TouchableOpacity onPressOut={this._startEditing}>
               <Feather name="edit" size={20} style={styles.actionContainer} />
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPressOut={(event) =>{
+                event.stopPropagation;
+                deleteToDo(id);
+              }
+             }>
               <Feather name="x" size={20} color={'#F23657'} style={styles.actionContainer} />
             </TouchableOpacity>
           </View>
@@ -68,21 +77,27 @@ export default class ToDo extends React.Component{
     )
   }
 
-  _toggleComplete = () => {
-    this.setState(prevState => {
-      return {
-          isCompleted: !prevState.isCompleted
-      }
-    })
+  _toggleComplete = (event) => {
+    event.stopPropagation;
+    const { isCompleted, completedToDo, uncompletedToDo, id} = this.props;
+    if(isCompleted){
+      uncompletedToDo(id);
+    } else {
+      completedToDo(id)
+    }
+
   }
-  _startEditing = () => {
-    const { text } = this.props
+  _startEditing = (event) => {
+    event.stopPropagation;
     this.setState({
-      isEditing: true,
-      toDoValue: text
+      isEditing: true
     })
   }
-  _finishEditing = () => {
+  _finishEditing = (event) => {
+    event.stopPropagation;
+    const { toDoValue } = this.state;
+    const {id, updateToDo} = this.props;
+    updateToDo(id, toDoValue);
     this.setState({
       isEditing: false
     })
